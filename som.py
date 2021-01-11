@@ -4,8 +4,9 @@ from datetime import datetime
 import numpy as np
 import threading
 import protocolo
-# import scipy
+from scipy.io.wavfile import write
 import ctypes
+I2S_SAMPLE_RATE = 20000
 
 class SerialESP:
     def __init__(self, device, baudrate=115200):
@@ -40,12 +41,10 @@ class SerialESP:
     def LeSom(self):
 
         print("Aquisição inicializada (Pressione Ctrl + C para parar)")
-        # filenamecsv = datetime.now().strftime("%Y%m%d-%H%M%S") + ".csv"
         basefilename = datetime.now().strftime("%Y%m%d-%H%M%S")
-        # a_file = open(filenamecsv, "w")
         once = True
         soundBuffer = []
-        BUFFERSIZE = 5000
+        BUFFERSIZE = I2S_SAMPLE_RATE // 4
         
         for i in range(BUFFERSIZE):
             soundBuffer.append(0)
@@ -56,32 +55,31 @@ class SerialESP:
         while True:
                 cont += 1
                 cmdlido = self.ser.read(1)
-                
+                print(cmdlido)
                 if(cmdlido == protocolo.cmd_parar):
                     break
                 self.ser.readline()
                 bufferSize = int.from_bytes(self.ser.read(4), "little")
                 print(bufferSize)
-                soundBytesBuffer = bytearray()                
+                soundBytesBuffer = bytearray()
                 soundBytesBuffer = self.ser.read(bufferSize)
                 
                 for i in range(bufferSize//2):
                     soundBuffer[i] = ctypes.c_int16(((soundBytesBuffer[i] << 8) | soundBytesBuffer[i+1])).value
 
                 npbuffer = np.append(npbuffer, np.array(soundBuffer))
-                if cont >= 240:
-                    contMinutos += 1
-                    filename = basefilename + "[" + str(contMinutos)  + "]"+ ".npz"
-                    np.savez_compressed(filename, som=npbuffer)
-                    npbuffer = np.array([], dtype='int16')
-                    cont = 0
-                # np.savetxt(a_file, npbuffer)
                 print("Buffer de som lido e salvo com sucesso.")
                 if ((not self.flagAquisitando) and once):
                     once = False
                     self.paraAquisicao()
                     print("parar")
-        # a_file.close()
+    # if cont >= 240:
+        # contMinutos += 1
+        filename = basefilename + "[" + str(contMinutos)  + "]"+ ".wav"
+        # np.savez_compressed(filename, som=npbuffer)
+        write(filename, I2S_SAMPLE_RATE, npbuffer.astype(np.int16))
+        npbuffer = np.array([], dtype='int16')
+        # cont = 0
         self.aguardaFimAquisicao()
      
     def iniciaAquisicao(self):
