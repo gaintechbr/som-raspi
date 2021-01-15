@@ -6,6 +6,7 @@ import threading
 import protocolo
 from scipy.io.wavfile import write
 import ctypes
+import time
 I2S_SAMPLE_RATE = 20000
 
 class SerialESP:
@@ -44,42 +45,59 @@ class SerialESP:
         basefilename = datetime.now().strftime("%Y%m%d-%H%M%S")
         once = True
         soundBuffer = []
-        BUFFERSIZE = I2S_SAMPLE_RATE // 4
+        BUFFERSIZE = I2S_SAMPLE_RATE // 2
         
         for i in range(BUFFERSIZE):
             soundBuffer.append(0)
         
         npbuffer = np.array([], dtype='int16')
+        start = time.time()
         cont = 0
-        contMinutos = 0
+        cont5min = 0
         while True:
-                cont += 1
+                antes = time.time()
                 cmdlido = self.ser.read(1)
-                print(cmdlido)
                 if(cmdlido == protocolo.cmd_parar):
                     break
-                self.ser.readline()
+                # print(self.ser.readline())
                 bufferSize = int.from_bytes(self.ser.read(4), "little")
                 print(bufferSize)
                 soundBytesBuffer = bytearray()
                 soundBytesBuffer = self.ser.read(bufferSize)
                 
-                for i in range(bufferSize//2):
-                    soundBuffer[i] = ctypes.c_int16(((soundBytesBuffer[i] << 8) | soundBytesBuffer[i+1])).value
+                for i in range(bufferSize // 2):
+                    j = 2*i
+                    soundBuffer[i] = ctypes.c_int16(((soundBytesBuffer[j+1] << 8) | soundBytesBuffer[j])).value
 
                 npbuffer = np.append(npbuffer, np.array(soundBuffer))
-                print("Buffer de som lido e salvo com sucesso.")
+                print(self.ser.in_waiting)
+                # print("Buffer de som lido e salvo com sucesso.")
+                cont += 1
+                if(cont >= 5*60*2):
+                    filename = basefilename + "[" + str(cont5min) + "]" + ".npz"
+                    np.savez(filename, som=npbuffer.astype(np.int16))
+                    # filename = basefilename + "[" + str(cont5min) + "]" + ".wav"
+                    # write(filename, I2S_SAMPLE_RATE, npbuffer.astype(np.int16))
+                    npbuffer = np.array([], dtype='int16')
+                    cont5min += 1
+                    cont = 0
+
+                print(len(npbuffer))
+                print(time.time() - antes)
                 if ((not self.flagAquisitando) and once):
                     once = False
                     self.paraAquisicao()
                     print("parar")
-    # if cont >= 240:
-        # contMinutos += 1
-        filename = basefilename + "[" + str(contMinutos)  + "]"+ ".wav"
-        # np.savez_compressed(filename, som=npbuffer)
-        write(filename, I2S_SAMPLE_RATE, npbuffer.astype(np.int16))
+        
+        print("Tempo aprox. de execução:")
+        elapsed = time.time() - start
+        print(elapsed)
+        # print(len(npbuffer)/I2S_SAMPLE_RATE)
+        filename = basefilename + "[Final].npz"
+        np.savez(filename, som=npbuffer.astype(np.int16))
+        # filename = basefilename + "[Final].wav"
+        # write(filename, I2S_SAMPLE_RATE, npbuffer.astype(np.int16))
         npbuffer = np.array([], dtype='int16')
-        # cont = 0
         self.aguardaFimAquisicao()
      
     def iniciaAquisicao(self):
@@ -126,20 +144,6 @@ def main():
             print(protocolo.cmd_parar)
         elif entrada == "7":
             ser.flushInput()
-        elif entrada == 'c':
-            loaded = np.load('20210110-213632[2].npz')
-            print(loaded.files)
-            som = loaded['som']
-
-            print(len(som))
-            # print(som[0])
-            # print(som[1])
-            # print(som[2])
-            # print(loaded[3])
-            # print(loaded[4])
-            # print(loaded[5])
-            # print(loaded[6])
-
         elif entrada == "0":
             ser.sendDataNoACK("P")
             ser.encerra()
