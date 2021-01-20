@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 
 import serial
 from datetime import datetime
@@ -44,7 +45,7 @@ class SerialESP:
 
         print("Aquisição inicializada (Pressione Ctrl + C para parar)")
         dataEHoraDoInicio = datetime.now().strftime("%Y%m%d-%H%M%S")
-        basefolder = "../data/" + dataEHoraDoInicio
+        basefolder = "/home/pi/gaintech/mspot-vale/data/" + dataEHoraDoInicio
         os.mkdir(basefolder)
         basefilename = basefolder + "/" + dataEHoraDoInicio
         once = True
