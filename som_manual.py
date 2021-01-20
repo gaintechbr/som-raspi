@@ -7,6 +7,7 @@ import protocolo
 from scipy.io.wavfile import write
 import ctypes
 import time
+import os
 I2S_SAMPLE_RATE = 20000
 
 class SerialESP:
@@ -42,7 +43,10 @@ class SerialESP:
     def LeSom(self):
 
         print("Aquisição inicializada (Pressione Ctrl + C para parar)")
-        basefilename = datetime.now().strftime("%Y%m%d-%H%M%S")
+        dataEHoraDoInicio = datetime.now().strftime("%Y%m%d-%H%M%S")
+        basefolder = "../data/" + dataEHoraDoInicio
+        os.mkdir(basefolder)
+        basefilename = basefolder + "/" + dataEHoraDoInicio
         once = True
         soundBuffer = []
         BUFFERSIZE = I2S_SAMPLE_RATE // 2
