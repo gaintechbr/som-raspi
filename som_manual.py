@@ -44,7 +44,7 @@ class SerialESP:
     def LeSom(self):
 
         print("Aquisição inicializada (Pressione Ctrl + C para parar)")
-        dataEHoraDoInicio = datetime.now().strftime("%Y%m%d-%H%M%S")
+        dataEHoraDoInicio = "teste" #datetime.now().strftime("%Y%m%d-%H%M%S")
         basefolder = "/home/pi/gaintech/mspot-vale/data/" + dataEHoraDoInicio
         os.mkdir(basefolder)
         basefilename = basefolder + "/" + dataEHoraDoInicio

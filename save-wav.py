@@ -1,10 +1,10 @@
 import numpy as np
 from scipy.io.wavfile import write
 
-filename_in = input("Informe o nome do arquivo de origem .npz: (com extensão)")
+filename_in = "../../data/teste/teste[Final].npz" #input("Informe o nome do arquivo de origem .npz: (com extensão)")
 
-filename_out = input("Informe o nome do arquivo de destino .wav: (com extensão)")
-filename_out = "../../data/" + filename_out
+#filename_out = input("Informe o nome do arquivo de destino .wav: (com extensão)")
+filename_out = "../../data/teste/som.wav"
 buffer = np.load(filename_in)
 som = buffer["som"]
 
