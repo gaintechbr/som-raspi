@@ -45,7 +45,8 @@ class SerialESP:
 
         print("Aquisição inicializada (Pressione Ctrl + C para parar)")
         dataEHoraDoInicio = datetime.now().strftime("%Y%m%d-%H%M%S")
-        basefolder = "/home/pi/gaintech/mspot-vale/data/" + dataEHoraDoInicio
+	databasefolder = "/media/pi/Disk/Projeto_Vale/Dados/SOM/"
+        basefolder = databasefolder + dataEHoraDoInicio
         os.mkdir(basefolder)
         basefilename = basefolder + "/" + dataEHoraDoInicio
         once = True
