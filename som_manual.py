@@ -46,13 +46,12 @@ class SerialESP:
     def LeSom(self):
 
         print("Aquisição inicializada (Pressione Ctrl + C para parar)")
-        dataEHoraDoInicio = datetime.now().strftime("%Y%m%d-%H%M%S")
-        pastaHDExternoBase = "/media/pi/Leonardo/Projeto_Vale/Dados/SOM/"
+        nomeArquivoTemporarioBase = datetime.now().strftime("%Y%m%d-%H%M%S")
+        # pastaHDExternoBase = "/media/pi/Leonardo/Projeto_Vale/Dados/SOM/"
         pastaTemporaria = "/home/pi/gaintech/mspot-vale/data/"
-        pastaExecucaoAtualHDExterno = pastaHDExternoBase + dataEHoraDoInicio
-        os.mkdir(pastaExecucaoAtualHDExterno)
-        print("Pasta criada com sucesso: {}".format(pastaExecucaoAtualHDExterno))
-        nomeArquivoTemporarioBase = dataEHoraDoInicio
+        # pastaExecucaoAtualHDExterno = pastaHDExternoBase + nomeArquivoTemporarioBase
+        # os.mkdir(pastaExecucaoAtualHDExterno)
+        # print("Pasta criada com sucesso: {}".format(pastaExecucaoAtualHDExterno))
         
         once = True
         soundBuffer = []
@@ -95,13 +94,13 @@ class SerialESP:
                 if(cont >= iteracoes):
                     nomeArquivo = nomeArquivoTemporarioBase + "[" + str(cont5min) + "]" + ".npz"
                     caminhoArquivoTemporario = pastaTemporaria + "/" + nomeArquivo
-                    caminhoArquivoHD = pastaExecucaoAtualHDExterno + "/" + nomeArquivo
+                    # caminhoArquivoHD = pastaExecucaoAtualHDExterno + "/" + nomeArquivo
                     
                     np.savez(caminhoArquivoTemporario, som=npbuffer.astype(np.int16))
                     # npbuffer = np.array([], dtype='int16')
                     
-                    i = threading.Thread(target=self.moveTempFile, args=(caminhoArquivoTemporario,caminhoArquivoHD,))
-                    i.start()
+                    # i = threading.Thread(target=self.moveTempFile, args=(caminhoArquivoTemporario,caminhoArquivoHD,))
+                    # i.start()
      
                     cont5min += 1
                     cont = 0
@@ -119,13 +118,13 @@ class SerialESP:
 
         nomeArquivo = nomeArquivoTemporarioBase + "[Final].npz"
         caminhoArquivoTemporario = pastaTemporaria + "/" + nomeArquivo
-        caminhoArquivoHD = pastaExecucaoAtualHDExterno + "/" + nomeArquivo
+        # caminhoArquivoHD = pastaExecucaoAtualHDExterno + "/" + nomeArquivo
         
         np.savez(caminhoArquivoTemporario, som=npbuffer.astype(np.int16))
         npbuffer = np.array([], dtype='int16')
         
-        i = threading.Thread(target=self.moveTempFile, args=(caminhoArquivoTemporario,caminhoArquivoHD,))
-        i.start()
+        # i = threading.Thread(target=self.moveTempFile, args=(caminhoArquivoTemporario,caminhoArquivoHD,))
+        # i.start()
         
         self.aguardaFimAquisicao()
      
