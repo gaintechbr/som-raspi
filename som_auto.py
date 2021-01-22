@@ -1,11 +1,8 @@
-#!/usr/bin/env python3
-
 import serial
 from datetime import datetime
 import numpy as np
 import threading
 import protocolo
-from scipy.io.wavfile import write
 import ctypes
 import time
 import os
@@ -61,10 +58,17 @@ class SerialESP:
         for i in range(BUFFERSIZE):
             soundBuffer.append(0)
         
-        npbuffer = np.array([], dtype='int16')
+        # npbuffer = np.array([], dtype='int16')
+        iteracoes = 5*60*2
+        tamanhoBufferArquivo = iteracoes * BUFFERSIZE
+        npbuffer = np.zeros(tamanhoBufferArquivo, dtype="int16")
+        
         start = time.time()
         cont = 0
         cont5min = 0
+
+        self.sendData("3")
+
         while True:
                 antes = time.time()
                 cmdlido = self.ser.read(1)
@@ -79,26 +83,27 @@ class SerialESP:
                 for i in range(bufferSize // 2):
                     j = 2*i
                     soundBuffer[i] = ctypes.c_int16(((soundBytesBuffer[j+1] << 8) | soundBytesBuffer[j])).value
-
-                npbuffer = np.append(npbuffer, np.array(soundBuffer))
+                
+                # npbuffer = np.append(npbuffer, np.array(soundBuffer))
+                npbuffer[cont*BUFFERSIZE:(cont+1)*BUFFERSIZE] = soundBuffer[0:BUFFERSIZE]
                 print(self.ser.in_waiting)
                 # print("Buffer de som lido e salvo com sucesso.")
                 cont += 1
-                if(cont >= 5*60*2):
+                if(cont >= iteracoes):
                     nomeArquivo = nomeArquivoTemporarioBase + "[" + str(cont5min) + "]" + ".npz"
                     caminhoArquivoTemporario = pastaTemporaria + "/" + nomeArquivo
                     caminhoArquivoHD = pastaExecucaoAtualHDExterno + "/" + nomeArquivo
                     
                     np.savez(caminhoArquivoTemporario, som=npbuffer.astype(np.int16))
-                    npbuffer = np.array([], dtype='int16')
-                    
+                    # npbuffer = np.array([], dtype='int16')
+
                     i = threading.Thread(target=self.moveTempFile, args=(caminhoArquivoTemporario,caminhoArquivoHD,))
                     i.start()
                     
                     cont5min += 1
                     cont = 0
 
-                print(len(npbuffer))
+                print(cont)
                 print(time.time() - antes)
                 if ((not self.flagAquisitando) and once):
                     once = False
@@ -122,7 +127,6 @@ class SerialESP:
         self.aguardaFimAquisicao()
      
     def iniciaAquisicao(self):
-        self.sendData("3")
         self.flagAquisitando = True
         # i = threading.Thread(target=self.get_input)
         # i.start()
