@@ -47,7 +47,7 @@ class SerialESP:
 
         print("Aquisição inicializada (Pressione Ctrl + C para parar)")
         dataEHoraDoInicio = datetime.now().strftime("%Y%m%d-%H%M%S")
-        pastaHDExternoBase = "/media/pi/Disk/Projeto_Vale/Dados/SOM/"
+        pastaHDExternoBase = "/media/pi/Leonardo/Projeto_Vale/Dados/SOM/"
         pastaTemporaria = "/home/pi/gaintech/mspot-vale/data/"
         pastaExecucaoAtualHDExterno = pastaHDExternoBase + dataEHoraDoInicio
         os.mkdir(pastaExecucaoAtualHDExterno)
