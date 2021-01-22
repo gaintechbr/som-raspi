@@ -19,5 +19,9 @@ while True:
             shutil.move(temppath+arquivo, database+arquivo)
     except :#FileNotFoundError, PermissionError::
         print("HD nao conectado")
+<<<<<<< HEAD
     time.sleep(60)
+=======
+    time.sleep(1)
+>>>>>>> d60fdaf9094f1290cd94c6dac020c1f9d8c00eb6
     print("ok")

@@ -58,7 +58,7 @@ class SerialESP:
             soundBuffer.append(0)
         
         # npbuffer = np.array([], dtype='int16')
-        iteracoes = 5*60*2
+        iteracoes = 10#5*60*2
         tamanhoBufferArquivo = iteracoes * BUFFERSIZE
         npbuffer = np.zeros(tamanhoBufferArquivo, dtype="int16")
         
