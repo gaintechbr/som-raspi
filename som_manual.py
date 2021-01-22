@@ -9,6 +9,8 @@ from scipy.io.wavfile import write
 import ctypes
 import time
 import os
+import shutil
+
 I2S_SAMPLE_RATE = 20000
 
 class SerialESP:
@@ -45,10 +47,13 @@ class SerialESP:
 
         print("Aquisição inicializada (Pressione Ctrl + C para parar)")
         dataEHoraDoInicio = "teste" #datetime.now().strftime("%Y%m%d-%H%M%S")
-        databasefolder = "/media/pi/Disk/Projeto_Vale/Dados/SOM/"
-        basefolder = databasefolder + dataEHoraDoInicio
-        os.mkdir(basefolder)
-        basefilename = basefolder + "/" + dataEHoraDoInicio
+        pastaHDExternoBase = "/media/pi/Disk/Projeto_Vale/Dados/SOM/"
+        pastaTemporaria = "/home/pi/gaintech/mspot-vale/data/"
+        pastaExecucaoAtualHDExterno = pastaHDExternoBase + dataEHoraDoInicio
+        os.mkdir(pastaExecucaoAtualHDExterno)
+        print("Pasta criada com sucesso: {}".format(pastaExecucaoAtualHDExterno))
+        nomeArquivoTemporarioBase = dataEHoraDoInicio
+        
         once = True
         soundBuffer = []
         BUFFERSIZE = I2S_SAMPLE_RATE // 2
@@ -80,11 +85,16 @@ class SerialESP:
                 # print("Buffer de som lido e salvo com sucesso.")
                 cont += 1
                 if(cont >= 5*60*2):
-                    filename = basefilename + "[" + str(cont5min) + "]" + ".npz"
-                    np.savez(filename, som=npbuffer.astype(np.int16))
-                    # filename = basefilename + "[" + str(cont5min) + "]" + ".wav"
-                    # write(filename, I2S_SAMPLE_RATE, npbuffer.astype(np.int16))
+                    nomeArquivo = nomeArquivoTemporarioBase + "[" + str(cont5min) + "]" + ".npz"
+                    caminhoArquivoTemporario = pastaTemporaria + "/" + nomeArquivo
+                    caminhoArquivoHD = pastaExecucaoAtualHDExterno + "/" + nomeArquivo
+                    
+                    np.savez(caminhoArquivoTemporario, som=npbuffer.astype(np.int16))
                     npbuffer = np.array([], dtype='int16')
+                    
+                    i = threading.Thread(target=self.moveTempFile, args=(caminhoArquivoTemporario,caminhoArquivoHD,))
+                    i.start()
+     
                     cont5min += 1
                     cont = 0
 
@@ -98,12 +108,17 @@ class SerialESP:
         print("Tempo aprox. de execução:")
         elapsed = time.time() - start
         print(elapsed)
-        # print(len(npbuffer)/I2S_SAMPLE_RATE)
-        filename = basefilename + "[Final].npz"
-        np.savez(filename, som=npbuffer.astype(np.int16))
-        # filename = basefilename + "[Final].wav"
-        # write(filename, I2S_SAMPLE_RATE, npbuffer.astype(np.int16))
+
+        nomeArquivo = nomeArquivoTemporarioBase + "[Final].npz"
+        caminhoArquivoTemporario = pastaTemporaria + "/" + nomeArquivo
+        caminhoArquivoHD = pastaExecucaoAtualHDExterno + "/" + nomeArquivo
+        
+        np.savez(caminhoArquivoTemporario, som=npbuffer.astype(np.int16))
         npbuffer = np.array([], dtype='int16')
+        
+        i = threading.Thread(target=self.moveTempFile, args=(caminhoArquivoTemporario,caminhoArquivoHD,))
+        i.start()
+        
         self.aguardaFimAquisicao()
      
     def iniciaAquisicao(self):
@@ -134,6 +149,8 @@ class SerialESP:
             tecla = input('Pressione enter para parar\n')
         self.flagAquisitando = False
         
+    def moveTempFile(self, src, dst):
+        shutil.move(src, dst)
     
 
 def main():
