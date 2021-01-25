@@ -5,7 +5,7 @@ import time
 from protocolo import discoComEspacoLivre
 
 temppath = "/home/pi/gaintech/mspot-vale/data/"
-database = "/media/pi/Seagate Expansion Drive/Projeto_Vale/SOM/"
+database = "/media/pi/Disk/Projeto_Vale/Dados/SOM/"
 
 while True:
     arquivosParaMover = [f for f in listdir(temppath) if isfile(join(temppath, f))]
