@@ -62,7 +62,6 @@ class SerialESP:
         cont5min = 0
 
         self.sendData("3")
-
         while True:
                 antes = time.time()
                 cmdlido = self.ser.read(1)
@@ -70,6 +69,8 @@ class SerialESP:
                     break
                 bufferSize = int.from_bytes(self.ser.read(4), "little")
                 print(bufferSize)
+                if(bufferSize > 20000):
+                    raise Exception("Erro ao ler via serial")
                 soundBytesBuffer = bytearray()
                 soundBytesBuffer = self.ser.read(bufferSize)
                 
@@ -96,7 +97,7 @@ class SerialESP:
                     once = False
                     self.paraAquisicao()
                     print("parar")
-        
+
         print("Tempo aprox. de execução:")
         elapsed = time.time() - start
         print(elapsed)
@@ -139,6 +140,12 @@ class SerialESP:
 
 def main():
     ser = SerialESP("/dev/ttyUSB0", 921600)
-    ser.iniciaAquisicao()
+    try:
+        ser.iniciaAquisicao()
+    except Exception:
+        ser.ser.write(protocolo.reset)
+        time.sleep(1)
+        ser.aguardaFimAquisicao()
+        main()
 
 main()
