@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.io.wavfile import write
 
-filename_in = "/media/pi/GainTech/Projeto_vale/SOM/20210122-130056/20210122-130056[Final].npz" #input("Informe o nome do arquivo de origem .npz: (com extensão)")
+filename_in = "/media/pi/Seagate Expansion Drive/Projeto_Vale/SOM/20210122-143412[Final].npz" #input("Informe o nome do arquivo de origem .npz: (com extensão)")
 
 #filename_out = input("Informe o nome do arquivo de destino .wav: (com extensão)")
 filename_out = "../../data/som.wav"
